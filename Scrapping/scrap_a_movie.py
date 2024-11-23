@@ -1,11 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from io import BytesIO
+from movie import Movie
 
 def scrap_a_movie(movie_url):
-    movie_name = ""
-    movie_genre = []
-    movie_poster = ""
+    current_movie = Movie()
 
     # IMDb URL
     url = movie_url  # Replace with the IMDb page URL
@@ -29,12 +28,12 @@ def scrap_a_movie(movie_url):
             # Extract image URL
             image_url = image_element.get("src")
             if image_url:
-                print(f"Image URL: {image_url}")
+                # print(f"Image URL: {image_url}")
 
                 # Download the image
                 image_response = requests.get(image_url)
                 image_response.raise_for_status()
-                movie_poster = BytesIO(image_response.content)
+                current_movie.poster = image_response.content
             else:
                 print("Image URL not found.")
         else:
@@ -42,13 +41,13 @@ def scrap_a_movie(movie_url):
 
         name_element = soup.find('span', class_ = 'hero__primary-text')
         if name_element:
-            movie_name = name_element.text
+            current_movie.name = name_element.text
         else:
             print("Name not found")
 
         genre_elements = soup.find_all('span', class_='ipc-chip__text')
-        movie_genre = [genre.text for genre in genre_elements]
-        movie_genre.pop()
+        current_movie.genre = [genre.text for genre in genre_elements]
+        current_movie.genre.pop()
 
 
 
@@ -57,4 +56,4 @@ def scrap_a_movie(movie_url):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-    return movie_name, movie_genre, movie_poster
+    return current_movie

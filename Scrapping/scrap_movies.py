@@ -25,3 +25,5 @@ for url in urls:
     print("movie #", i, "/1000")
     print(current_movie)
     i+=1
+
+sql_instance.close_connection()

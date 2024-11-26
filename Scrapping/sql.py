@@ -152,3 +152,24 @@ class SQL:
             self.connect_movie_to_genre(movie_id, genre_id)
 
         return movie_id
+    
+    def close_connection(self):
+        """
+        Closes the database cursor and connection.
+        """
+        if self.cursor:
+            try:
+                self.cursor.close()
+                print("Database cursor closed.")
+            except mysql.connector.Error as err:
+                print(f"Error closing cursor: {err}")
+            finally:
+                self.cursor = None
+        if self.cnx:
+            try:
+                self.cnx.close()
+                print("Database connection closed.")
+            except mysql.connector.Error as err:
+                print(f"Error closing connection: {err}")
+            finally:
+                self.cnx = None

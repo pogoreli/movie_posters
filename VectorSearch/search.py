@@ -6,6 +6,8 @@ from mysql.connector import errorcode
 class MovieVectorDatabase:
     def __init__(self):
         # Establish the database connection
+        print(os.environ.get('SQL_USERNAME'))
+        print(os.environ.get('SQL_PASSWORD'))
         try:
             self.connection = mysql.connector.connect(
                 user=os.environ.get('SQL_USERNAME'),

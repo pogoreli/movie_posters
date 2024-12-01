@@ -27,7 +27,7 @@ class MovieVectorDatabase:
         if self.connection:
             self.connection.close()
 
-    def get_closest_vector_id(self, input_vector):
+    def get_closest_vector_id(self, input_vector, num_results=3):
         # Ensure input_vector is a NumPy array
         if not isinstance(input_vector, np.ndarray):
             raise ValueError("input_vector must be a numpy array")
@@ -47,39 +47,40 @@ class MovieVectorDatabase:
         # Add each dimension's distance contribution to the query
         distance_terms = [f"POW(vec_{i} - {input_vector[i]}, 2)" for i in range(n)]
         query += " + ".join(distance_terms)
-        query += " ) AS distance FROM vectors ORDER BY distance ASC LIMIT 1;"
+        query += f" ) AS distance FROM vectors ORDER BY distance ASC LIMIT {num_results};"
         
         # Execute the query
         cursor.execute(query)
-        result = cursor.fetchone()
+        results = cursor.fetchall()
         
         # Close the cursor
         cursor.close()
         
-        # Return the movie_id of the closest vector
-        if result:
-            return int(result[0])
+        # Return the movie_ids of the closest vectors
+        if results:
+            return [int(row[0]) for row in results]
         else:
             raise ValueError("No vectors found in the database")
 
-    def get_movie_genres_indexes(self, movie_id):
+    def get_movie_genres_indexes(self, movie_ids):
         if not self.connection:
             print("No database connection.")
             return []
         
         cursor = self.connection.cursor()
         try:
-            query = """
-                SELECT genre_id
+            format_strings = ','.join(['%s'] * len(movie_ids))
+            query = f"""
+                SELECT DISTINCT genre_id
                 FROM movie_genres
-                WHERE movie_id = %s;
+                WHERE movie_id IN ({format_strings});
             """
-            cursor.execute(query, (movie_id,))
+            cursor.execute(query, tuple(movie_ids))
             results = cursor.fetchall()
             genre_ids = [row[0] for row in results]
             return genre_ids
         except mysql.connector.Error as err:
-            print(f"Error retrieving genres for movie ID {movie_id}: {err}")
+            print(f"Error retrieving genres for movie IDs {movie_ids}: {err}")
             return []
         finally:
             cursor.close()
@@ -112,10 +113,10 @@ class MovieVectorDatabase:
 if __name__ == "__main__":
     db = MovieVectorDatabase()
     input_vector = np.array([3.0, 5.2, 7.1] + [0.0] * 253)  # Adjusted for 256 dimensions
-    closest_id = db.get_closest_vector_id(input_vector)
-    if closest_id is not None:
-        print("Closest vector ID:", closest_id)
-        genres = db.get_movie_genres_indexes(closest_id)
-        print("Genres for the closest movie (IDs):", genres)
+    closest_ids = db.get_closest_vector_ids(input_vector)
+    if closest_ids:
+        print("Closest vector IDs:", closest_ids)
+        genres = db.get_movie_genres_indexes(closest_ids)
+        print("Genres for the closest movies (IDs):", genres)
         genre_names = db.get_genre_names_by_indexes(genres)
-        print("Genres for the closest movie (Names):", genre_names)
+        print("Genres for the closest movies (Names):", genre_names)

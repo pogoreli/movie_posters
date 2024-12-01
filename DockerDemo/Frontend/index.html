@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Genre Predictor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:,"> <!-- This line suppresses favicon.ico request -->
+</head>
+<body>
+    <div class="image-uploader">
+        <h1>Movie Genre Predictor</h1>
+        <div id="image-frame" class="image-frame">
+            <span id="upload-prompt" class="upload-prompt">Click to add an image</span>
+            <img id="preview-image" class="hidden" src="" alt="Preview">
+            <button id="replace-button" class="replace-button hidden">Replace</button>
+            <div id="progress-bar" class="progress-bar hidden">
+                <div id="progress" class="progress"></div>
+            </div>
+        </div>
+        <input type="file" id="file-input" class="file-input" accept="image/*">
+        <button id="send-button" class="send-button hidden">Send</button>
+        <div id="result" class="result hidden">
+            <h3>Predicted Genres:</h3>
+            <div id="genres-container" class="genres-container"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

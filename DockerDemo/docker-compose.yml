@@ -1,0 +1,38 @@
+networks:
+  project_network:
+    driver: bridge
+
+services:
+  database:
+    build: ./Database
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: project_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    networks:
+      - project_network
+
+  backend:
+    build: ./Backend
+    container_name: flask_backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    environment:
+      DB_HOST: mysql_db
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: project_db
+    networks:
+      - project_network
+
+  frontend:
+    build: ./Frontend
+    container_name: html_frontend
+    ports:
+      - "3006:80"
+    networks:
+      - project_network
